@@ -7,6 +7,12 @@ description: Deploy multilingual static websites for free on Cloudflare using As
 
 Deploy multilingual static websites for free on Cloudflare using Astro framework.
 
+## Prerequisites
+
+- Node.js 20+ installed
+- Cloudflare account (free)
+- Git repository (GitHub, GitLab, or Bitbucket)
+
 ## Quick Start
 
 ### 1. Create Project
@@ -17,20 +23,36 @@ cd my-site
 npm install
 ```
 
-### 2. Add Cloudflare Adapter
+### 2. Configure for Cloudflare
+
+**Static Sites (Recommended for most use cases)**
+
+No adapter needed. Use default static output:
+
+```javascript
+// astro.config.mjs
+import { defineConfig } from 'astro/config';
+
+export default defineConfig({
+  site: 'https://your-site.pages.dev',
+});
+```
+
+**SSR/Edge Functions (Optional)**
+
+If you need server-side rendering or edge functions:
 
 ```bash
 npm install @astrojs/cloudflare
 ```
 
-Update `astro.config.mjs`:
-
 ```javascript
+// astro.config.mjs
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
-  output: 'static',
+  output: 'server',
   adapter: cloudflare(),
   site: 'https://your-site.pages.dev',
 });
@@ -49,6 +71,10 @@ export default defineConfig({
 **Direct Upload**
 
 ```bash
+# Authenticate first
+npx wrangler login
+
+# Deploy
 npx wrangler pages deploy dist
 ```
 
@@ -63,11 +89,18 @@ export default defineConfig({
     defaultLocale: 'en',
     locales: ['en', 'es', 'fr', 'de'],
     routing: {
-      prefixDefaultLocale: false,
+      prefixDefaultLocale: false,  // /about instead of /en/about
     },
   },
 });
 ```
+
+**Routing Modes:**
+
+| Setting | URL Structure | Best For |
+|---------|--------------|----------|
+| `prefixDefaultLocale: false` | `/about`, `/es/about` | Default locale at root |
+| `prefixDefaultLocale: true` | `/en/about`, `/es/about` | All locales prefixed |
 
 ### Content Structure
 
@@ -104,6 +137,8 @@ const docs = defineCollection({
 export const collections = { docs };
 ```
 
+**Note:** Run `npx astro sync` after adding content collections to generate types.
+
 ### Language Switcher Component
 
 ```astro
@@ -136,10 +171,11 @@ const currentLang = Astro.currentLocale || 'en';
 
 ```
 my-site/
-├── astro.config.mjs      # Astro + Cloudflare config
+├── astro.config.mjs      # Astro configuration
 ├── package.json
 ├── public/
-│   └── favicon.svg
+│   ├── favicon.svg
+│   └── _redirects        # Cloudflare redirects (optional)
 ├── src/
 │   ├── components/
 │   │   └── LanguageSwitcher.astro
@@ -156,7 +192,6 @@ my-site/
 │       │   └── index.astro
 │       └── es/
 │           └── index.astro
-└── wrangler.toml         # Cloudflare config (optional)
 ```
 
 ## Cloudflare Pages Settings
@@ -165,7 +200,8 @@ my-site/
 |---------|-------|
 | Build command | `npm run build` |
 | Build output | `dist` |
-| Node version | `18` |
+| Node version | `20` |
+| Environment | `NODE_VERSION=20` |
 
 ### Custom Domain
 
@@ -187,6 +223,8 @@ Create `public/_redirects`:
 | `npm run dev` | Start dev server |
 | `npm run build` | Build for production |
 | `npm run preview` | Preview production build |
+| `npx astro sync` | Generate content collection types |
+| `npx wrangler login` | Authenticate with Cloudflare |
 | `npx wrangler pages deploy dist` | Deploy to Cloudflare |
 
 ## Blog with Content Collections
@@ -218,7 +256,7 @@ const { Content } = await post.render();
 
 ### Build Fails on Cloudflare
 
-Set `NODE_VERSION=18` in environment variables.
+Set `NODE_VERSION=20` in Cloudflare Pages environment variables.
 
 ### 404 on Nested Routes
 
@@ -234,6 +272,11 @@ export default defineConfig({
 Ensure:
 1. Locales match folder names exactly
 2. Content files have correct `lang` frontmatter
+3. Run `npx astro sync` after creating content collections
+
+### Content Collection Type Errors
+
+Run `npx astro sync` to generate TypeScript types.
 
 ## Resources
 
@@ -246,7 +289,26 @@ Ensure:
 
 | Script | Description |
 |--------|-------------|
-| `scripts/astro-new-post.py` | Create multilingual blog posts |
-| `scripts/astro-i18n-check.py` | Validate translation coverage |
+| `astro-new-post.py` | Create multilingual blog posts |
+| `astro-i18n-check.py` | Validate translation coverage |
+
+### Script Usage
+
+```bash
+# Create a new post in multiple languages
+python scripts/astro-new-post.py --title "My Post" --langs en,es,fr
+
+# Create with author and tags
+python scripts/astro-new-post.py --title "Tutorial" --langs en,es --author "John" --tags tutorial,astro
+
+# Check translation coverage
+python scripts/astro-i18n-check.py --langs en,es,fr
+
+# Check specific content directory
+python scripts/astro-i18n-check.py --content-dir src/content/blog --langs en,es
+
+# Output as JSON
+python scripts/astro-i18n-check.py --langs en,es,fr --json
+```
 
 All scripts use only Python standard library (no dependencies).
