@@ -11,19 +11,27 @@ Deploy multilingual static websites for free on Cloudflare using Astro framework
 ```bash
 # Install skill
 clawhub install astro
+```
 
-# Use in OpenClaw
-# The skill triggers automatically when creating static sites, 
-# setting up multilingual content, or deploying to Cloudflare Pages.
+### glab
+
+GitLab CLI for managing issues, merge requests, CI/CD pipelines, and repositories.
+
+```bash
+# Install skill
+clawhub install glab
+
+# Requires: glab, jq, GITLAB_TOKEN
 ```
 
 ## Installing Skills
 
 ```bash
-# Install all skills from this repo
-clawhub install bezko/openclaw-skills
-
 # Install specific skill
+clawhub install astro
+clawhub install glab
+
+# Or install from repo
 clawhub install bezko/openclaw-skills/skills/astro
 ```
 
@@ -32,12 +40,8 @@ clawhub install bezko/openclaw-skills/skills/astro
 Skills in this repository follow ClawHub standards and can be published to [clawhub.com](https://clawhub.com).
 
 ```bash
-# Package a skill
-cd skills/astro
-clawhub package .
-
 # Publish to ClawHub
-clawhub publish astro.skill
+clawhub publish ./skills/glab --slug glab --name "glab" --version 1.0.2
 ```
 
 ## Contributing
@@ -45,7 +49,7 @@ clawhub publish astro.skill
 1. Fork this repository
 2. Create a new skill in `skills/<skill-name>/`
 3. Include `SKILL.md` with proper frontmatter
-4. Add scripts in `scripts/` (Python, no dependencies)
+4. Add scripts in `scripts/` (Python/Bash, minimal dependencies)
 5. Submit a pull request
 
 ## License
